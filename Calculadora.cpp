@@ -1,8 +1,8 @@
 #include <iostream>
-#include <cmath> // Para la función sqrt
+#include <cmath>
+
 using namespace std;
 
-// Definición de la estructura Dot
 struct Dot {
     float x;
     float y;
@@ -16,85 +16,94 @@ struct Dot {
 };
 
 // Función para calcular la distancia entre dos puntos
-float calcularDistancia(const Dot& p1, const Dot& p2) {
-    float dx = p2.x - p1.x;
-    float dy = p2.y - p1.y;
-    float dz = p2.z - p1.z;
-    return sqrt(dx * dx + dy * dy + dz * dz);
+float distance(const Dot& p1, const Dot& p2) {
+    return std::sqrt(std::pow(p2.x - p1.x, 2) + std::pow(p2.y - p1.y, 2) + std::pow(p2.z - p1.z, 2));
 }
 
-// Función para calcular el vector resultante en 2 dimensiones
-Dot calcularVectorResultante2D(const Dot& p1, const Dot& p2) {
-    float vx = p2.x - p1.x;
-    float vy = p2.y - p1.y;
-    return Dot(vx, vy, 0.0f);
+// Función para calcular el vector resultante en 2 y 3 dimensiones
+Dot resultantVector(const Dot& p1, const Dot& p2) {
+    return Dot(p2.x - p1.x, p2.y - p1.y, p2.z - p1.z);
 }
 
-// Función para calcular el vector resultante en 3 dimensiones
-Dot calcularVectorResultante3D(const Dot& p1, const Dot& p2) {
-    float vx = p2.x - p1.x;
-    float vy = p2.y - p1.y;
-    float vz = p2.z - p1.z;
-    return Dot(vx, vy, vz);
+// Función para calcular el vector resultante de un arreglo de N vectores en 2 y 3 dimensiones
+Dot resultantVector(Dot* dots, int n) {
+    Dot result(0, 0, 0);
+    for (int i = 0; i < n; i++) {
+        result.x += dots[i].x;
+        result.y += dots[i].y;
+        result.z += dots[i].z;
+    }
+    return result;
 }
 
-// Función para calcular el producto escalar entre dos vectores
-float calcularProductoEscalar(const Dot& v1, const Dot& v2) {
-    return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z;
+// Función para calcular el producto escalar en 2 y 3 dimensiones
+float dotProduct(const Dot& p1, const Dot& p2) {
+    return p1.x * p2.x + p1.y * p2.y + p1.z * p2.z;
 }
 
-// Función para calcular el producto cruz entre dos vectores
-Dot calcularProductoCruz(const Dot& v1, const Dot& v2) {
-    float cx = v1.y * v2.z - v1.z * v2.y;
-    float cy = v1.z * v2.x - v1.x * v2.z;
-    float cz = v1.x * v2.y - v1.y * v2.x;
-    return Dot(cx, cy, cz);
+// Función para calcular el producto cruz en 3 dimensiones
+Dot crossProduct(const Dot& p1, const Dot& p2) {
+    return Dot(p1.y * p2.z - p1.z * p2.y, p1.z * p2.x - p1.x * p2.z, p1.x * p2.y - p1.y * p2.x);
 }
 
-// Función para imprimir un vector en formato u = i + j + k
-void imprimirVector(const Dot& v) {
-    cout << "u = " << v.x << "i + " << v.y << "j + " << v.z << "k" << endl;
-}
+// Función para imprimir el vector en formato -> u = i + j + k (vector unitario), e indicar el plano donde se ubica
+void printVector(const Dot& vector) {
+    float magnitude = std::sqrt(vector.x * vector.x + vector.y * vector.y + vector.z * vector.z);
+    cout << "u = [" << vector.x / magnitude << "] i + [" << vector.y / magnitude << "] j + [" << vector.z / magnitude << "] k (vector unitario)" << endl;
 
-// Función para determinar el plano donde se ubica un vector
-void determinarPlano(const Dot& v) {
-    if (v.z == 0.0f) {
-        if (v.x == 0.0f) {
-            cout << "El vector esta en el plano YZ" << endl;
-        } else if (v.y == 0.0f) {
-            cout << "El vector esta en el plano XZ" << endl;
+    if (vector.z == 0) {
+        if (vector.y == 0) {
+            cout << "El vector se ubica en el plano X" << endl;
         } else {
-            cout << "El vector esta en el plano XY" << endl;
+            cout << "El vector se ubica en el plano XY" << endl;
         }
     } else {
-        if (v.x == 0.0f) {
-            cout << "El vector esta en el plano YZ" << endl;
-        } else if (v.y == 0.0f) {
-            cout << "El vector esta en el plano XZ" << endl;
+        if (vector.y == 0) {
+            cout << "El vector se ubica en el plano XZ" << endl;
         } else {
-            cout << "El vector no esta en un plano específico" << endl;
+            cout << "El vector se ubica en el plano XYZ" << endl;
         }
     }
 }
 
+// Función para resolver un sistema de fuerzas
+void solveForceSystem(Dot* forces, int o) {
+    Dot resultant = resultantVector(forces, o);
+    cout << "Vector resultante del sistema de fuerzas:" << endl;
+    printVector(resultant);
+}
+
 int main() {
+    int o;
+    cout << "Ingrese el número de vectores: ";
+    cin >> o;
 
-    Dot p1(1.0f, 2.0f, 3.0f);
-    Dot p2(4.0f, 5.0f, 6.0f);
+    Dot* forces = new Dot[o];
 
-    cout << "Distancia entre p1 y p2: " << calcularDistancia(p1, p2) << endl;
+    cout << "Ingrese las coordenadas de los vectores:" << endl;
+    for (int i = 0; i < o; i++) {
+        float x, y, z;
+        cout << "Vector " << i + 1 << ": ";
+        cin >> x >> y >> z;
+        forces[i] = Dot(x, y, z);
+    }
 
-    Dot v2D = calcularVectorResultante2D(p1, p2);
-    cout << "Vector resultante en 2D: ";
-    imprimirVector(v2D);
-    determinarPlano(v2D);
+    Dot p1(1, 2, 3);
+    Dot p2(4, 5, 6);
 
-    Dot v3D = calcularVectorResultante3D(p1, p2);
+    cout << "Distancia entre p1 y p2: " << distance(p1, p2) << endl;
+    cout << "Vector resultante entre p1 y p2: ";
+    printVector(resultantVector(p1, p2));
 
-    cout << "Vector resultante en 3D: ";
-    imprimirVector(v3D);
-    determinarPlano(v3D);
+    cout << "Vector resultante del arreglo de fuerzas: ";
+    printVector(resultantVector(forces, o));
 
-    cout << "Producto escalar: " << calcularProductoEscalar << endl;
+    cout << "Producto escalar de p1 y p2: " << dotProduct(p1, p2) << endl;
+    cout << "Producto cruz de p1 y p2: ";
+    printVector(crossProduct(p1, p2));
 
+    solveForceSystem(forces, o);
+
+    delete[] forces;
+    return 0;
 }
